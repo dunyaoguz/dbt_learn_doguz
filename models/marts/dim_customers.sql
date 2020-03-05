@@ -3,11 +3,7 @@ with customers as (
 )
 
 , orders as (
-    select * from {{ ref('stg_orders') }}
-)
-
-, payments as (
-  select * from {{ ref('orders') }}
+    select * from {{ ref('fct_orders') }}
 )
 
 , customer_orders as (
@@ -16,15 +12,8 @@ with customers as (
         , min(order_date) as first_order_date
         , max(order_date) as most_recent_order_date
         , count(order_id) as number_of_orders
+        , sum(amount) as lifetime_value
     from orders
-    group by 1
-)
-
-, lifetime_value as (
-  select
-    customer_id
-    , sum(amount) as lifetime_value
-    from payments
     group by 1
 )
 
@@ -36,10 +25,9 @@ with customers as (
         , customer_orders.first_order_date
         , customer_orders.most_recent_order_date
         , coalesce(customer_orders.number_of_orders, 0) as number_of_orders
-        , lifetime_value.lifetime_value
+        , coalesce(customer_orders.lifetime_value, 0) AS lifetime_value
     from customers
     left join customer_orders using (customer_id)
-    left join lifetime_value using (customer_id)
 )
 
 select * from final
