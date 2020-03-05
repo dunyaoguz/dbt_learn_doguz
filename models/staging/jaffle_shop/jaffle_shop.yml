@@ -1,12 +1,5 @@
 version: 2
 models:
-  - name: dim_customers
-    columns:
-      - name: customer_id
-        description: One record per customer
-        tests:
-          - unique
-          - not_null
   - name: stg_jaffle_shop__customers
     description: This model cleans up customer data
     columns:
